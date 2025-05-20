@@ -15,14 +15,14 @@
     </v-row>
 
     <v-alert
-      v-if="lowStockCount > 0 || outOfStockCount > 0"
+      v-if="dashboardData?.inventory?.lowStock > 0 || dashboardData?.inventory?.outOfStock > 0"
       type="warning"
       variant="outlined"
       class="mb-4"
     >
       Inventory Alert: 
-      <span v-if="lowStockCount > 0">{{ lowStockCount }} product(s) low on stock</span>
-      <span v-if="outOfStockCount > 0">, {{ outOfStockCount }} product(s) out of stock</span>
+      <span v-if="dashboardData?.inventory?.lowStock > 0">{{ dashboardData?.inventory?.lowStock }} product(s) low on stock</span>
+      <span v-if="dashboardData?.inventory?.outOfStock > 0">, {{ dashboardData?.inventory?.outOfStock }} product(s) out of stock</span>
     </v-alert>
 
  
@@ -69,20 +69,11 @@
       class="elevation-1"
     >
       <template v-slot:item.stock_level="{ item }">
-        <v-text-field
-          v-model.number="item.stock_level"
-          type="number"
-          density="compact"
-          @change="updateStock(item)"
-          :error="item.stock_level < item.minStock"
-        ></v-text-field>
         <v-chip
-          v-if="getStockStatus(item) !== 'in-stock'"
-          :color="getStockStatusColor(item)"
           size="small"
           class="mt-1"
         >
-          {{ getStockStatus(item) }}
+          {{ item.stock_level }}
         </v-chip>
       </template>
     </v-data-table>
@@ -93,6 +84,8 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
 import BaseCard from '../components/BaseCard.vue';
+import { useDashboard } from '../composables/useDashboard'
+const { dashboardData, fetchDashboardData} = useDashboard();
 
 interface Product {
   _id?: string
@@ -100,8 +93,9 @@ interface Product {
   description?: string
   price?: number
   stock_level?: number
+  status?: string
   category?: string
-  minStock?: number
+  min_stock?: number
   image_url?: string
   createdAt?: string
   updatedAt?: string
@@ -115,7 +109,6 @@ const products = ref<Product[]>([])
 const loading = ref(false)
 const errorMessage = ref('')
 
-// Mock categories - replace with API data when available
 const categories = computed(() => {
   const uniqueCategories = new Set(products.value.map(p => p.category))
   return Array.from(uniqueCategories).filter(Boolean) as string[]
@@ -132,49 +125,38 @@ const headers = ref([
   { title: 'Product', key: 'name' },
   { title: 'Category', key: 'category' },
   { title: 'Price', key: 'price' },
-  { title: 'Stock Level', key: 'stock_level' },
+  { title: 'Stock', key: 'stock_level' },
   { title: 'Status', key: 'status' }
 ])
 
 const stats = computed(() => [
   { 
     title: 'Total Products', 
-    value: products.value.length,
+    value: dashboardData.value?.inventory?.totalProducts || 0,
     icon: 'mdi-package-variant',
     color: 'primary'
   },
   { 
     title: 'In Stock', 
-    value: inStockCount.value,
+    value: products.value?.filter(product => product.status == 'In Stock').length || 0,
     icon: 'mdi-check-circle',
     color: 'success'
   },
   { 
     title: 'Low Stock', 
-    value: lowStockCount.value,
+    value: dashboardData.value?.inventory?.lowStock || 0,
     icon: 'mdi-alert-circle',
     color: 'warning'
   },
   { 
     title: 'Out of Stock', 
-    value: outOfStockCount.value,
+    value: dashboardData.value?.inventory?.outOfStock || 0,
     icon: 'mdi-close-circle',
     color: 'error'
   }
 ])
 
 
-const inStockCount = computed(() => 
-  products.value.filter(p => getStockStatus(p) === 'in-stock').length
-)
-
-const lowStockCount = computed(() => 
-  products.value.filter(p => getStockStatus(p) === 'low-stock').length
-)
-
-const outOfStockCount = computed(() => 
-  products.value.filter(p => getStockStatus(p) === 'out-of-stock').length
-)
 
 const filteredProducts = computed(() => {
   return products.value.filter(product => {
@@ -187,22 +169,14 @@ const filteredProducts = computed(() => {
   })
 })
 
-function getStockStatus(product: Product) {
-  const stock = product.stock_level || 0
-  const minStock = product.minStock || 0
-  
-  if (stock <= 0) return 'out-of-stock'
-  if (stock < minStock) return 'low-stock'
-  return 'in-stock'
-}
 
-function getStockStatusColor(product: Product) {
-  const status = getStockStatus(product)
-  return {
-    'out-of-stock': 'error',
-    'low-stock': 'warning',
-    'in-stock': 'success'
-  }[status]
+function getStockStatus(product: Product): string {
+  const stock = product.stock_level || 0
+  const minStock = product.min_stock || 0
+
+  if (stock === 0) return 'out-of-stock'
+  if (stock > 0 && stock <= minStock) return 'low-stock'
+  return 'in-stock'
 }
 
 async function fetchProducts() {
@@ -211,7 +185,6 @@ async function fetchProducts() {
     const response = await api.get('/products')
     products.value = response.data.map((product: Product) => ({
       ...product,
-      minStock: 20 // Set your minimum stock threshold here
     }))
   } catch (error) {
     errorMessage.value = 'Failed to load products'
@@ -221,22 +194,25 @@ async function fetchProducts() {
   }
 }
 
-async function updateStock(product: Product) {
-  try {
-    if (!product._id) return
-    await api.patch(`/products/${product._id}`, {
-      stock_level: product.stock_level
-    })
-    await fetchProducts()
-  } catch (error) {
-    errorMessage.value = 'Failed to update stock'
-    console.error('Error updating stock:', error)
-  }
-}
+// async function updateStock(product: Product) {
+//   try {
+//     if (!product._id) return
+//     await api.patch(`/products/${product._id}`, {
+//       stock_level: product.stock_level
+//     })
+//     await fetchProducts()
+//   } catch (error) {
+//     errorMessage.value = 'Failed to update stock'
+//     console.error('Error updating stock:', error)
+//   }
+// }
 
-onMounted(() => {
-  fetchProducts()
+onMounted(async() => {
+  await fetchProducts()
+  await fetchDashboardData();
+
 })
+
 </script>
 
 <style scoped>

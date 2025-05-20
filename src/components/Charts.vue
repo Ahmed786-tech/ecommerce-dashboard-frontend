@@ -17,42 +17,37 @@
         </v-btn>
     </v-btn-toggle>
     <v-card>
-    <ApexChart :type="chartType" height="400" :options="chartOptions" :series="chartSeries"></ApexChart>
+        <ApexChart :type="chartType" height="400" :options="chartOptions" :series="chartSeries"></ApexChart>
     </v-card>
 
 </template>
 
 <script setup lang="ts">
 import ApexChart from 'vue3-apexcharts'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useDashboard } from '../composables/useDashboard'
 
+
+const { dashboardData, fetchDashboardData} = useDashboard();
 const chartType = ref<'line' | 'bar' | 'area'>('line')
 
-// Dummy data for different chart types
 const dummyData = computed(() => {
     switch (chartType.value) {
         case 'line':
+        return {
+                categories: dashboardData.value?.analytics?.revenue.categories || [],
+                series: dashboardData.value?.analytics?.revenue.series || [],
+            }
         case 'area':
             return {
-                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                series: [{
-                    name: 'Revenue',
-                    data: [4000, 7000, 3500, 8500, 6000, 9000]
-                }, {
-                    name: 'Sales',
-                    data: [300, 500, 450, 600, 550, 700]
-                }]
+                categories: dashboardData.value?.analytics?.orders.categories || [],
+                series: dashboardData.value?.analytics?.orders.series || [],
             }
         case 'bar':
             return {
-                categories: ['Electronics', 'Clothing', 'Home Goods', 'Beauty'],
-                series: [{
-                    name: 'Q1',
-                    data: [4000, 3000, 6000, 2000]
-                }, {
-                    name: 'Q2',
-                    data: [5000, 4000, 6500, 2500]
-                }]
+                categories: dashboardData.value?.analytics?.sales.categories || [],
+                series: dashboardData.value?.analytics?.sales.series || [],
+
             }
         default:
             return {
@@ -106,6 +101,11 @@ const chartOptions = computed(() => ({
 }))
 
 const chartSeries = computed(() => dummyData.value.series)
+
+onMounted(async () => {
+  await fetchDashboardData();
+});
+
 </script>
 
 <style scoped>

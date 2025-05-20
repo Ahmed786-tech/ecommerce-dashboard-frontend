@@ -61,14 +61,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+
+
 import { categoryData } from '../utils/mockData'
 import Charts from '../components/Charts.vue'
 import BaseCard from '../components/BaseCard.vue'
-
+import { useDashboard } from '../composables/useDashboard'
+const { dashboardData, fetchDashboardData } = useDashboard();
 const categoryFilters = ['All', ...categoryData.labels]
 
-// const timeRange = ref('Monthly')
+
 const selectedCategory = ref('All')
 
 
@@ -92,18 +95,23 @@ const toggleEndDateMenu = () => {
 const revenue = computed(() => [
   {
     title: 'Total Revenue',
-    value: "7773948",
+    value: `$${dashboardData.value?.stats?.totalRevenue || 0}`,
     icon: 'mdi-currency-usd',
     color: 'primary'
   },
   {
     title: 'Total Orders',
-    value: "8882992",
+    value: dashboardData.value?.stats?.totalOrders || 0,
     icon: 'mdi-cart',
     color: 'success'
   },
 
 ])
+
+onMounted(async () => {
+  await fetchDashboardData();
+});
+
 
 // const currentData = computed(() => mockChartData[timeRange.value as keyof typeof mockChartData])
 
