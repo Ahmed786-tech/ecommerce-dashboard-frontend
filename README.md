@@ -1,5 +1,61 @@
-# Vue 3 + TypeScript + Vite
+# e-dashboard
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+A backend API built with **Express**, **TypeScript**, and **MongoDB** for managing users, products, and orders in an e-commerce dashboard.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+---
+
+## Table of Contents
+
+- [Features](#features)  
+- [Prerequisites](#prerequisites)  
+- [Installation](#installation)  
+- [Environment Setup](#environment-setup)  
+- [Available Scripts](#available-scripts)  
+- [Project Structure](#project-structure)  
+- [Usage](#usage)  
+- [Notes](#notes)  
+- [Troubleshooting](#troubleshooting)  
+- [License](#license)
+
+---
+
+## Features
+
+- User registration with password hashing (bcryptjs)  
+- Product model with stock status virtuals  
+- Order model linking users and products  
+- TypeScript interfaces for schema validation  
+- Ready for adding REST API endpoints  
+- Seed script for populating initial data  
+
+---
+
+
+## Installation
+
+1. **Clone the repo**
+
+   ```bash
+   git clone <your-repo-url>
+   cd <your-repo-name>
+
+2. scripts**
+
+   ```bash
+   npm install
+   ```
+
+   | Command         | Description                            |
+| --------------- | -------------------------------------- |
+| `npm run build` | Compile TypeScript to JavaScript       |
+| `npm run dev`   | Run in development with vite           |
+
+
+2. **Set up environment variables**
+
+   Create a `.env` file in the root directory and add your MongoDB connection string:
+
+   ```plaintext
+   VITE_API_URL=http://localhost:5000
+   ```
+
