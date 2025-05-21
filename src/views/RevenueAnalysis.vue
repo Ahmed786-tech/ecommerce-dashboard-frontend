@@ -31,8 +31,7 @@
             <v-date-picker v-model="endDate" @input="endDateMenu = false" />
           </v-menu>
 
-          <v-select v-model="selectedCategory" :items="categoryFilters" label="Filter by Category" variant="outlined"
-            :density="'comfortable'" dense></v-select>
+         
         </v-sheet>
 
       </v-col>
@@ -62,17 +61,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-
-
-import { categoryData } from '../utils/mockData'
 import Charts from '../components/Charts.vue'
 import BaseCard from '../components/BaseCard.vue'
 import { useDashboard } from '../composables/useDashboard'
 const { dashboardData, fetchDashboardData } = useDashboard();
-const categoryFilters = ['All', ...categoryData.labels]
-
-
-const selectedCategory = ref('All')
 
 
 const startDate = ref<string>('');

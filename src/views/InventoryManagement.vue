@@ -15,14 +15,14 @@
     </v-row>
 
     <v-alert
-      v-if="dashboardData?.inventory?.lowStock > 0 || dashboardData?.inventory?.outOfStock > 0"
+      v-if="dashboardData && dashboardData.inventory && (dashboardData.inventory.lowStock > 0 || dashboardData.inventory.outOfStock > 0)"
       type="warning"
       variant="outlined"
       class="mb-4"
     >
       Inventory Alert: 
-      <span v-if="dashboardData?.inventory?.lowStock > 0">{{ dashboardData?.inventory?.lowStock }} product(s) low on stock</span>
-      <span v-if="dashboardData?.inventory?.outOfStock > 0">, {{ dashboardData?.inventory?.outOfStock }} product(s) out of stock</span>
+      <span v-if="dashboardData.inventory.lowStock > 0">{{ dashboardData.inventory.lowStock }} product(s) low on stock</span>
+      <span v-if="dashboardData.inventory.outOfStock > 0">, {{ dashboardData.inventory.outOfStock }} product(s) out of stock</span>
     </v-alert>
 
  

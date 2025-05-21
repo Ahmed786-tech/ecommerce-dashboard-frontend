@@ -11,19 +11,19 @@
             </div>
           </div>
 
-          <v-text-field v-model="form.name" label="Product Name" :rules="[required]" variant="outlined"
+          <v-text-field v-model="form.name" label="Product Name" variant="outlined"
             class="mb-4"></v-text-field>
 
           <v-textarea v-model="form.description" label="Description" variant="outlined" rows="3"
             class="mb-4"></v-textarea>
 
-          <v-text-field v-model.number="form.price" label="Price" type="number" :rules="[positiveNumber]"
+          <v-text-field v-model.number="form.price" label="Price" type="number" 
             variant="outlined" class="mb-4" prefix="$"></v-text-field>
 
-          <v-text-field v-model.number="form.stock" label="Initial Stock" type="number" :rules="[positiveNumber]"
+          <v-text-field v-model.number="form.stock" label="Initial Stock" type="number" 
             variant="outlined"></v-text-field>
 
-          <v-text-field v-model.number="form.minStock" label="Min Stock" type="number" :rules="[positiveNumber]"
+          <v-text-field v-model.number="form.minStock" label="Min Stock" type="number" 
             variant="outlined"></v-text-field>
           <v-select v-model="selectedCategory" :items="categoryFilters" label="Filter by Category" variant="outlined"
             :density="'comfortable'" dense></v-select>
