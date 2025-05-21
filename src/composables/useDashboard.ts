@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import api from '../services/api';
+import {formatDate} from '../utils/dateFormat';
 
 interface DashboardData {
   inventory: {
@@ -32,10 +33,17 @@ export const useDashboard = () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (startDate: string, endDate: string) => {
     try {
       loading.value = true;
-      const response = await api.get('/dashboard');
+      const formattedStart = formatDate(startDate);
+      const formattedEnd = formatDate(endDate);
+      const response = await api.get('/dashboard',{
+        params: {
+          startDate: formattedStart,
+          endDate: formattedEnd
+        }
+      });
       const data = response.data;
       dashboardData.value = {
         inventory: {

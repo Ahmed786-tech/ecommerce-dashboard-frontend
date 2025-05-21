@@ -83,29 +83,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
+import type { IProduct } from '../types';
 import BaseCard from '../components/BaseCard.vue';
 import { useDashboard } from '../composables/useDashboard'
-const { dashboardData, fetchDashboardData} = useDashboard();
 
-interface Product {
-  _id?: string
-  name?: string
-  description?: string
-  price?: number
-  stock_level?: number
-  status?: string
-  category?: string
-  min_stock?: number
-  image_url?: string
-  createdAt?: string
-  updatedAt?: string
-  __v?: number
-}
+const { dashboardData, fetchDashboardData} = useDashboard();
 
 const search = ref('')
 const selectedCategory = ref('')
 const selectedStatus = ref('')
-const products = ref<Product[]>([])
+const products = ref<IProduct[]>([])
 const loading = ref(false)
 const errorMessage = ref('')
 
@@ -170,7 +157,7 @@ const filteredProducts = computed(() => {
 })
 
 
-function getStockStatus(product: Product): string {
+function getStockStatus(product: IProduct): string {
   const stock = product.stock_level || 0
   const minStock = product.min_stock || 0
 
@@ -183,7 +170,7 @@ async function fetchProducts() {
   try {
     loading.value = true
     const response = await api.get('/products')
-    products.value = response.data.map((product: Product) => ({
+    products.value = response.data.map((product: IProduct) => ({
       ...product,
     }))
   } catch (error) {
@@ -209,7 +196,7 @@ async function fetchProducts() {
 
 onMounted(async() => {
   await fetchProducts()
-  await fetchDashboardData();
+  await fetchDashboardData('', '');
 
 })
 

@@ -8,7 +8,6 @@
 
       <v-col cols="12" md="7">
         <v-sheet class="d-flex ga-1 align-end">
-
           <v-text-field v-model="startDate" label="Pick start Date" variant="outlined" :density="'comfortable'" readonly
             @click:append-inner="toggleStartDateMenu">
             <template v-slot:append-inner>
@@ -60,10 +59,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import Charts from '../components/Charts.vue'
 import BaseCard from '../components/BaseCard.vue'
 import { useDashboard } from '../composables/useDashboard'
+
 const { dashboardData, fetchDashboardData } = useDashboard();
 
 
@@ -82,7 +82,6 @@ const toggleEndDateMenu = () => {
 };
 
 
-// Computed properties
 
 const revenue = computed(() => [
   {
@@ -100,40 +99,14 @@ const revenue = computed(() => [
 
 ])
 
+watch([startDate, endDate], ([newStart, newEnd]) => {
+  if (newStart && newEnd) {
+    fetchDashboardData(newStart, newEnd);
+  }
+}, { immediate: true });
+
 onMounted(async () => {
-  await fetchDashboardData();
+  await fetchDashboardData(startDate.value, endDate.value);
 });
-
-
-// const currentData = computed(() => mockChartData[timeRange.value as keyof typeof mockChartData])
-
-// const filteredData = computed(() => {
-//   if (selectedCategory.value === 'All') return currentData.value
-
-//   const categoryIndex = categoryData.labels.indexOf(selectedCategory.value)
-//   if (categoryIndex === -1) return currentData.value
-
-//   const categoryRatio = categoryData.sales[categoryIndex] /
-//     categoryData.sales.reduce((a, b) => a + b, 0)
-
-//   return {
-//     labels: currentData.value.labels,
-//     sales: currentData.value.sales.map(v => Math.round(v * categoryRatio)),
-//     orders: currentData.value.orders.map(v => Math.round(v * categoryRatio))
-//   }
-// })
-
-
-
-// const totalRevenue = computed(() =>
-//   filteredData.value.sales.reduce((a, b) => a + b, 0)
-// )
-
-// const totalOrders = computed(() =>
-//   filteredData.value.orders.reduce((a, b) => a + b, 0)
-// )
-
-
-
 
 </script>

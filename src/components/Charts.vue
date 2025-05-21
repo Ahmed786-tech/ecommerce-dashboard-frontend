@@ -103,7 +103,7 @@ const chartOptions = computed(() => ({
 const chartSeries = computed(() => dummyData.value.series)
 
 onMounted(async () => {
-  await fetchDashboardData();
+  await fetchDashboardData('', '');
 });
 
 </script>
