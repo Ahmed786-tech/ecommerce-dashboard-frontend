@@ -122,7 +122,7 @@
   
     try {
       loading.value = true;
-      const response = await api.post('/api/v1users/register', {
+      const response = await api.post('/api/v1/users/register', {
         name: name.value,
         email: email.value,
         password: password.value,
