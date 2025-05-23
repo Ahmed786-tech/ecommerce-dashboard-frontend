@@ -25,7 +25,7 @@
 
           <v-text-field v-model.number="form.minStock" label="Min Stock" type="number" 
             variant="outlined"></v-text-field>
-          <v-select v-model="selectedCategory" :items="categoryFilters" label="Filter by Category" variant="outlined"
+          <v-select v-model="form.selectedCategory" :items="categoryFilters" label="Filter by Category" variant="outlined"
             :density="'comfortable'" dense></v-select>
         </v-card>
       </v-col>
@@ -43,6 +43,7 @@
           <v-file-upload v-model="form.image" label="Drag and drop or click to upload" accept="image/*"
             :clearable="!!form.image" :max-size="5 * 1024 * 1024" class="upload-area"></v-file-upload>
 
+            <!-- <img :src="form.image" alt="kzjdksjd"> -->
         </v-card>
       </v-col>
     </v-row>
@@ -73,23 +74,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted} from 'vue'
 import { VFileUpload } from 'vuetify/labs/VFileUpload'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../services/api'
 import { categoryData } from '../utils/mockData'
 
+
 const categoryFilters = ['All', ...categoryData.labels]
 const router = useRouter()
+const route = useRoute()
+const productId = route.params.id
 
-const selectedCategory = ref('All')
-const form = reactive({
+const isEditMode = ref(!!productId)
+let form = reactive({
   name: '',
   description: '',
   price: 0,
   stock: 0,
   minStock: 0,
-  image: null as any
+  image: null as any,
+  selectedCategory: ref('All')
 })
 
 
@@ -98,6 +103,26 @@ const successSnackbar = ref(false)
 const errorSnackbar = ref(false)
 const errorMessage = ref('')
 
+onMounted(async () => {
+  if (!isEditMode.value) return
+
+  try {
+    // loading.value = true
+    const response = await api.get(`/api/v1/products/${productId}`)
+    console.log(response.data)
+    form.name = response?.data?.name
+    form.description = response?.data?.description
+    form.price = response?.data?.price
+    form.stock = response?.data?.stock_level
+    form.minStock = response?.data?.min_stock
+    form.selectedCategory = response?.data?.category
+    form.image = response?.data?.image_url
+  } catch (error) {
+    console.error('Error fetching product:', error)
+  } finally {
+    loading.value = false
+  }
+})
 
 async function submitProduct() {
   if (!validateForm()) return
@@ -107,7 +132,7 @@ async function submitProduct() {
   formData.append('description', form.description)
   formData.append('price', form.price.toString())
   formData.append('stock_level', form.stock.toString())
-  formData.append('category', selectedCategory.value)
+  formData.append('category', form.selectedCategory)
   formData.append('min_stock', form.minStock.toString())
 
   if (form.image) {
@@ -116,16 +141,20 @@ async function submitProduct() {
 
   try {
     loading.value = true
-    const response = await api.post('/products', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-
-    if (response.status === 201) {
-      successSnackbar.value = true
-      setTimeout(() => router.push('/inventory'), 1500)
+    let response
+    if (isEditMode.value) {
+      response = await api.put(`/api/v1/products/${productId}`, formData)
+    } else {
+      response = await api.post('/api/v1/products', formData)
     }
+    
+   if (response.status === 200) { 
+      // successSnackbar.value = true
+      router.back()
+   }
+   loading.value = false
+      
+    
   } catch (error: any) {
     errorMessage.value = error.response?.data?.message || 'Failed to create product'
     errorSnackbar.value = true

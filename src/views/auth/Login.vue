@@ -108,7 +108,7 @@
   
     try {
       loading.value = true;
-      const response = await api.post('/users/login', {
+      const response = await api.post('/api/v1/users/login', {
         email: email.value,
         password: password.value,
       });

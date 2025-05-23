@@ -76,6 +76,13 @@
           {{ item.stock_level }}
         </v-chip>
       </template>
+      <template v-slot:item.actions="{ item }">
+      <v-btn 
+        @click="editProduct(item)"
+        color="primary"
+        icon="mdi-pencil"
+      ></v-btn>
+    </template>
     </v-data-table>
   </v-container>
 </template>
@@ -86,7 +93,9 @@ import api from '../services/api'
 import type { IProduct } from '../types';
 import BaseCard from '../components/BaseCard.vue';
 import { useDashboard } from '../composables/useDashboard'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const { dashboardData, fetchDashboardData} = useDashboard();
 
 const search = ref('')
@@ -113,7 +122,8 @@ const headers = ref([
   { title: 'Category', key: 'category' },
   { title: 'Price', key: 'price' },
   { title: 'Stock', key: 'stock_level' },
-  { title: 'Status', key: 'status' }
+  { title: 'Status', key: 'status' },
+  { title: 'Actions', key: 'actions' }
 ])
 
 const stats = computed(() => [
@@ -169,7 +179,7 @@ function getStockStatus(product: IProduct): string {
 async function fetchProducts() {
   try {
     loading.value = true
-    const response = await api.get('/products')
+    const response = await api.get('/api/v1/products')
     products.value = response.data.map((product: IProduct) => ({
       ...product,
     }))
@@ -179,6 +189,10 @@ async function fetchProducts() {
   } finally {
     loading.value = false
   }
+}
+
+const editProduct = (product: IProduct) => {
+  router.push(`/products/${product._id}`)
 }
 
 // async function updateStock(product: Product) {

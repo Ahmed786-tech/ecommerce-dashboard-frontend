@@ -25,11 +25,12 @@ const routes = [
   },
   {
     path: '/inventory',
+    name: 'Inventory',
     component: () => import('../views/InventoryManagement.vue'),
     meta: { requiresAuth: true }
   },
   {
-    path: '/products',
+    path: '/products/:id?',
     component: () => import('../views/ProductRegistration.vue'),
     meta: { requiresAuth: true }
   }
