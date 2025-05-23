@@ -38,7 +38,7 @@ export const useDashboard = () => {
       loading.value = true;
       const formattedStart = formatDate(startDate);
       const formattedEnd = formatDate(endDate);
-      const response = await api.get('/dashboard',{
+      const response = await api.get('/api/v1/dashboard',{
         params: {
           startDate: formattedStart,
           endDate: formattedEnd
